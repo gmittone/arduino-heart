@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.osx": {
+        "PATH": "/Users/rainbow/.platformio/penv/bin:/Users/rainbow/.platformio/penv:/opt/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Applications/VMware Fusion.app/Contents/Public:/opt/local/sbin:/Applications/Wireshark.app/Contents/MacOS:/opt/local/libexec/qt5/bin:/Users/rainbow/Library/Android/sdk/tools/bin",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
