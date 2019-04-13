@@ -1,0 +1,19 @@
+G04 start of page 6 for group -4063 idx -4063 *
+G04 Title: Stand-2 for heart, componentmask *
+G04 Creator: pcb 4.0.2 *
+G04 CreationDate: Fri Apr  5 19:32:28 2019 UTC *
+G04 For: alez *
+G04 Format: Gerber/RS-274X *
+G04 PCB-Dimensions (mil): 3937.01 2992.13 *
+G04 PCB-Coordinate-Origin: lower left *
+%MOIN*%
+%FSLAX25Y25*%
+%LNTOPMASK*%
+%ADD20C,0.0001*%
+G54D20*G36*
+X206404Y258789D02*X181781D01*
+Y1883D01*
+X206404D01*
+Y258789D01*
+G37*
+M02*

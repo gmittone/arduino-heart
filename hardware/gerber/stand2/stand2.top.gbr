@@ -1,0 +1,28 @@
+G04 start of page 2 for group 0 idx 0 *
+G04 Title: Stand-2 for heart, component *
+G04 Creator: pcb 4.0.2 *
+G04 CreationDate: Fri Apr  5 19:32:28 2019 UTC *
+G04 For: alez *
+G04 Format: Gerber/RS-274X *
+G04 PCB-Dimensions (mil): 3937.01 2992.13 *
+G04 PCB-Coordinate-Origin: lower left *
+%MOIN*%
+%FSLAX25Y25*%
+%LNTOP*%
+%ADD13C,0.0400*%
+%ADD12C,0.0800*%
+%ADD11C,0.0001*%
+G54D11*G36*
+X205904Y258289D02*X182281D01*
+Y2383D01*
+X205904D01*
+Y258289D01*
+G37*
+G54D12*X194092Y171675D03*
+Y211045D03*
+Y250415D03*
+Y53565D03*
+Y14194D03*
+Y92935D03*
+Y132305D03*
+G54D13*M02*

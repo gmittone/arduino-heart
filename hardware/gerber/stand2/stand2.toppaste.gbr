@@ -1,0 +1,19 @@
+G04 start of page 7 for group -4015 idx -4015 *
+G04 Title: Stand-2 for heart, toppaste *
+G04 Creator: pcb 4.0.2 *
+G04 CreationDate: Fri Apr  5 19:32:28 2019 UTC *
+G04 For: alez *
+G04 Format: Gerber/RS-274X *
+G04 PCB-Dimensions (mil): 3937.01 2992.13 *
+G04 PCB-Coordinate-Origin: lower left *
+%MOIN*%
+%FSLAX25Y25*%
+%LNTOPPASTE*%
+%ADD21C,0.0001*%
+G54D21*G36*
+X205904Y258289D02*X182281D01*
+Y2383D01*
+X205904D01*
+Y258289D01*
+G37*
+M02*

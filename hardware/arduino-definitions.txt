@@ -1,0 +1,51 @@
+Heart (c) 2018-2019 www.maetech.it
+*******************************************************
+
+    HW DEFINITIONS
+
+*******************************************************
+
+LCD
+	UTFT(ITDB32S,38,39,40,41)
+	Lcd stand-by digital pin 46
+		output low ==> lcd on
+		input hi-z (out hi?) ==> light off
+	Backlight digital pin 43, 
+		output low ==> light on
+		input hi-z (out hi?) ==> light off
+
+
+TOUCH
+	URTouch(5,6,7,11,12)
+	stand-by'd together to Lcd
+
+
+SD-CARD
+	Connected to main SPI bus
+		chip select (CS) = digital pin 3
+	stand-by = digital pin 48
+		output low ==> SD on
+		input hi-z (out hi?) ==> SD off
+
+
+BEEP
+	buzzer = digital pin 9
+		output low ==> beep on
+		input hi-z (out hi?) ==> beep off
+
+
+TRIGGERS
+	"B" -> digital pin 60 (alt. funct) active HI
+	"G" -> digital pin 68 (alt. funct) active HI
+
+
+RTC DS1307
+	main I2C interface
+	ALARM from RTC to digital pin 17 active HI
+
+
+ESP MODULE
+	uart comm TX1/RX1 (18/19)
+	Enable = digital pin 16
+	optionally connectable to main SPI bus
+		chip select (CS) = digital pin 10
