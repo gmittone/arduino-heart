@@ -1,0 +1,19 @@
+* esp8266
+
+** connessione wpa/wifi = modificabile dal codice arduino
+** DHCP
+** orario NTP
+** comunicazione TCP/UDP dal codice arduino listen/connect
+** connessione serial (spi) from arduino
+
+* arduino due (cortex M3)
+
+** sleep mode; wake pin change interrupt (from pad or ds1307)
+** display controller
+** gui:
+**** ora attuale (menu bar), timer from 16 giugno 2018 ...hour...
+**** impostazione sveglia
+**** foto fissa da firmware (testare rotazione da sd)
+
+
+* easter egg: pong adapt https://www.arduino.cc/en/Tutorial/TFTPong
