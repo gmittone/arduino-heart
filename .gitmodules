@@ -7,3 +7,6 @@
 [submodule "lib/Rtc"]
 	path = lib/Rtc
 	url = https://github.com/Makuna/Rtc.git
+[submodule "lib/Scheduler"]
+	path = lib/Scheduler
+	url = https://github.com/arduino-libraries/Scheduler.git
