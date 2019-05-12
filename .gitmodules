@@ -1,3 +1,6 @@
 [submodule "external/WiFiSpiESP"]
 	path = external/WiFiSpiESP
 	url = https://github.com/JiriBilek/WiFiSpiESP.git
+[submodule "lib/WiFiSpi"]
+	path = lib/WiFiSpi
+	url = https://github.com/JiriBilek/WiFiSpi.git
