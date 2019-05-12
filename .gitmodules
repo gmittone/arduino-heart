@@ -4,3 +4,6 @@
 [submodule "lib/WiFiSpi"]
 	path = lib/WiFiSpi
 	url = https://github.com/JiriBilek/WiFiSpi.git
+[submodule "lib/Rtc"]
+	path = lib/Rtc
+	url = https://github.com/Makuna/Rtc.git
