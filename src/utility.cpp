@@ -7,9 +7,54 @@
 
 
 #include <Arduino.h>
-#include "WiFiSpi.h"
+#include <WiFiSpi.h>
+#include <Wire.h>
+#include <RtcDS1307.h>
 
 #include "utility.h"
+
+void serialWelcome()
+{
+  Serial.println("                                          ");
+  Serial.println("                                          ");
+  Serial.println("          ** Arduino Heart **             ");
+  Serial.println("                                          ");
+  Serial.println("        @@@@@@           @@@@@@           ");
+  Serial.println("      @@@@@@@@@@       @@@@@@@@@@         ");
+  Serial.println("    @@@@@@@@@@@@@@   @@@@@@@@@@@@@@       ");
+  Serial.println("  @@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@@@@     ");
+  Serial.println(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ");
+  Serial.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   ");
+  Serial.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   ");
+  Serial.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   ");
+  Serial.println(" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ");
+  Serial.println("  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@     ");
+  Serial.println("   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@      ");
+  Serial.println("    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@       ");
+  Serial.println("      @@@@@@@@@@@@@@@@@@@@@@@@@@@         ");
+  Serial.println("        @@@@@@@@@@@@@@@@@@@@@@@           ");
+  Serial.println("          @@@@@@@@@@@@@@@@@@@             ");
+  Serial.println("            @@@@@@@@@@@@@@@               ");
+  Serial.println("              @@@@@@@@@@@                 ");
+  Serial.println("                @@@@@@@                   ");
+  Serial.println("                  @@@                     ");
+  Serial.println("                   @                      ");
+  Serial.println("                                          ");
+  Serial.println("                  by                      ");
+  Serial.println("       Alessandro `alez` Mauro            ");
+  Serial.println("                  &&                      ");
+  Serial.println("       Davide `rainbow` Gerhard           ");
+  Serial.println("                                          ");
+  Serial.println("          Copyright @ 2018                ");
+  Serial.println("                                          ");
+  Serial.println("                                          ");
+  Serial.print("Firmware compiled on: ");
+  Serial.print(__DATE__);
+  Serial.print(" - ");
+  Serial.println(__TIME__);
+  Serial.println();
+  Serial.println();
+}
 
 void printWifiData() {
   // print your WiFi module's IP address:
@@ -56,6 +101,6 @@ void printCurrentNet() {
 
   // print the received signal strength:
   long rssi = WiFiSpi.RSSI();
-  Serial.print("signal strength (RSSI):");
+  Serial.print("signal strength (RSSI): ");
   Serial.println(rssi);
 }

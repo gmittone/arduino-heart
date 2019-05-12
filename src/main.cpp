@@ -8,6 +8,9 @@
 /* don't forget, we are using the arduino framework */
 #include <Arduino.h>
 
+// Scheduler to manage multiple tasks.
+#include <Scheduler.h>
+
 /*
  * WiFiSpi - https://github.com/JiriBilek/WiFiSpi
  * include library that permit to use the esp8266
@@ -16,35 +19,58 @@
  * parameters from arduino code (this one) and
  * to instantiate tcp/udp/ssl sockets.
 */
-#include "WiFiSpi.h"
+#include <WiFiSpi.h>
 
-/* include some useful functions */
-#include "utility.h"
+/* include rtc class */
+#include "heart_rtc.h"
 
 /* include the ntp client class */
 #include "ntpclient.h"
 
-/* WiFi credentials */
-char ssid[] = "ArduinoHeart";
-char pass[] = "VtG5PpD8jfufym7fa77apTtjdpF";
+/* include some useful functions */
+#include "utility.h"
 
-/* the Wifi radio's status */
-int status = WL_IDLE_STATUS;
+/* main header */
+#include "main.h"
+
+#ifdef ENABLE_NETWORK
+/* instantiate web server on port 80 */
+WiFiSpiServer web_server(WEB_SERVER_PORT);
+
+/* instantiate ntp client */
+WiFiSpiUdp ntpUDP;
+NTPClient timeClient(ntpUDP, NTP_SERVER);
+#endif
 
 /*
  * INITIALIZE the board
  */
 void setup()
 {
-  //Initialize serial and wait for port to open:
+  // Initialize serial and wait for port to open:
   Serial.begin(9600);
   while (!Serial)
   {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
+  // Initialize the RTC chip
+  Heart_RTC.init();
+
+  // welcome screen on Serial
+  serialWelcome();
+
+#ifdef ENABLE_NETWORK
   // Initialize the WifiSpi library
   WiFiSpi.init();
+
+  // WiFiSpi versions
+  Serial.print("WiFiSpi ESP8266 firmware version: ");
+  Serial.println(WiFiSpi.firmwareVersion());
+  Serial.print("WiFiSpi ESP8266 protocol version: ");
+  Serial.println(WiFiSpi.protocolVersion());
+  Serial.print("WiFiSpi master protocol version: ");
+  Serial.println(WiFiSpi.masterProtocolVersion());
 
   // check for the presence of the ESP module:
   if (WiFiSpi.status() == WL_NO_SHIELD)
@@ -71,17 +97,33 @@ void setup()
     // Connect to WPA/WPA2 network:
     status = WiFiSpi.begin(ssid, pass);
 
-    // wait 10 seconds for connection:
-    delay(10000);
+    // wait 5 seconds for connection:
+    delay(5000);
   }
 
   // you're connected now, so print out the data:
   Serial.print("You're connected to the network");
   printCurrentNet();
   printWifiData();
+  Serial.println("");
 
-  /* get the time from ntp server */
-  NTPClient();
+  // Write the NTP time to the local RTC chip
+  // TODO evaluate latency from NTP function to set on RTC
+  Serial.print("Start ntp client to host: ");
+  Serial.println(NTP_SERVER);
+  timeClient.begin();
+  Heart_RTC.setDateTime(timeClient.getEpochTime());
+
+
+  // start web server
+  Serial.print("Start Webserver on host: ");
+  Serial.print(WiFiSpi.localIP());
+  Serial.print(" and port: ");
+  Serial.println(WEB_SERVER_PORT);
+  Serial.println("");
+  web_server.begin();
+  Scheduler.startLoop(web_server_loop);
+#endif // ENABLE_NETWORK  
 }
 
 /*
@@ -89,4 +131,73 @@ void setup()
  */
 void loop()
 {
+    timeClient.update();
+
+  Serial.println(timeClient.getFormattedTime());
+
+  delay(5000);
+  //yield();
 }
+
+#ifdef ENABLE_NETWORK
+void web_server_loop()
+{
+  // listen for incoming clients
+  WiFiSpiClient client = web_server.available();
+  if (client) {
+    #ifdef DEBUG
+    Serial.println("new client");
+    #endif
+    // an http request ends with a blank line
+    bool currentLineIsBlank = true;
+    while (client.connected()) {
+      if (client.available()) {
+        char c = client.read();
+        #ifdef DEBUG
+        Serial.write(c);
+        #endif
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
+        if (c == '\n' && currentLineIsBlank) {
+          // send a standard http response header
+          client.println("HTTP/1.1 200 OK");
+          client.println("Content-Type: text/html");
+          client.println("Connection: close");  // the connection will be closed after completion of the response
+          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          client.println();
+          client.println("<!DOCTYPE HTML>");
+          client.println("<html>");
+          // output the value of each analog input pin
+          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
+            int sensorReading = analogRead(analogChannel);
+            client.print("analog input ");
+            client.print(analogChannel);
+            client.print(" is ");
+            client.print(sensorReading);
+            client.println("<br />");
+          }
+          client.println("</html>");
+          break;
+        }
+        if (c == '\n') {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        } else if (c != '\r') {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        }
+      }
+    }
+    // give the web browser time to receive the data
+    delay(1);
+
+    // close the connection:
+    client.stop();
+    #ifdef DEBUG
+    Serial.println("client disonnected");
+    #endif
+  }
+  yield();
+}
+#endif // ENABLE_NETWORK

@@ -5,11 +5,14 @@
  * For the license see LICENSE
  */
 
-#ifndef UTILITY_H
-#define UTILITY_H
+#ifndef _UTILITY_H
+#define _UTILITY_H
+
+// welcome to serial
+void serialWelcome();
 
 // print information about wifi status
 void printWifiData();
 void printCurrentNet();
 
-#endif
+#endif // _UTILITY_H
