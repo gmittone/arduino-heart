@@ -12,6 +12,12 @@
 #include <RtcDS1307.h>
 #include <time.h>
 
+/*
+ * RTC DS1307 programmable alarm
+ * digital pin; active HI
+ */
+#define RTC_ALARM_PIN 17
+
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 
 class Heart_RTCClass

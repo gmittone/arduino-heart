@@ -1,0 +1,2 @@
+include/main.h filter=ignore_enable_network
+include/main.h filter=ignore_disable_debug

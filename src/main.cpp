@@ -8,7 +8,7 @@
 /* don't forget, we are using the arduino framework */
 #include <Arduino.h>
 
-// Scheduler to manage multiple tasks.
+/* Scheduler to manage multiple tasks */
 #include <Scheduler.h>
 
 /*
@@ -33,7 +33,7 @@
 /* main header */
 #include "main.h"
 
-#ifdef ENABLE_NETWORK
+#if ENABLE_NETWORK
 /* instantiate web server on port 80 */
 WiFiSpiServer web_server(WEB_SERVER_PORT);
 
@@ -47,20 +47,25 @@ NTPClient timeClient(ntpUDP, NTP_SERVER);
  */
 void setup()
 {
+  // before everything configure the touch buttons;
+  // they can be used as function trigger
+  pinMode(ctsGiovanni, INPUT);
+  pinMode(ctsBeatrice, INPUT);
+
   // Initialize serial and wait for port to open:
-  Serial.begin(9600);
+  Serial.begin(ARDUINO_SERIAL_SPEED);
   while (!Serial)
   {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
-  // Initialize the RTC chip
-  Heart_RTC.init();
-
   // welcome screen on Serial
   serialWelcome();
 
-#ifdef ENABLE_NETWORK
+  // Initialize the RTC chip
+  Heart_RTC.init();
+
+#if ENABLE_NETWORK
   // Initialize the WifiSpi library
   WiFiSpi.init();
 
@@ -123,7 +128,10 @@ void setup()
   Serial.println("");
   web_server.begin();
   Scheduler.startLoop(web_server_loop);
-#endif // ENABLE_NETWORK  
+#endif // ENABLE_NETWORK
+
+// loop on capacitive pads
+Scheduler.startLoop(cts_loop);
 }
 
 /*
@@ -131,21 +139,42 @@ void setup()
  */
 void loop()
 {
-    timeClient.update();
-
+  #if ENABLE_NETWORK
+  timeClient.update();
   Serial.println(timeClient.getFormattedTime());
+  #endif
 
-  delay(5000);
-  //yield();
+  delay(100);
 }
 
-#ifdef ENABLE_NETWORK
+void cts_loop()
+{
+  if(digitalRead(ctsGiovanni))
+  {
+    #if ENABLE_DEBUG
+    Serial.println("Giovanni TOUCHED");
+    #endif
+  }
+  if(digitalRead(ctsBeatrice))
+  {
+    #if ENABLE_DEBUG
+    Serial.println("Beatrice TOUCHED");
+    #endif
+  }
+
+  // 100ms seems good
+  delay(100);
+  yield();
+}
+
+
+#if ENABLE_NETWORK
 void web_server_loop()
 {
   // listen for incoming clients
   WiFiSpiClient client = web_server.available();
   if (client) {
-    #ifdef DEBUG
+    #if ENABLE_DEBUG
     Serial.println("new client");
     #endif
     // an http request ends with a blank line
@@ -153,7 +182,7 @@ void web_server_loop()
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
-        #ifdef DEBUG
+        #if ENABLE_DEBUG
         Serial.write(c);
         #endif
         // if you've gotten to the end of the line (received a newline
@@ -194,7 +223,7 @@ void web_server_loop()
 
     // close the connection:
     client.stop();
-    #ifdef DEBUG
+    #if ENABLE_DEBUG
     Serial.println("client disonnected");
     #endif
   }
