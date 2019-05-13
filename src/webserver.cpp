@@ -1,7 +1,7 @@
 /*
  * webserver.cpp - Implement the web server
  *
- * Created by Davide `rainbow` Gerhard and Alessandro `alez` Mauro
+ * Created by Davide `rainbow` Gerhard
  * 12 May 2019
  * For the license see LICENSE
  *

@@ -1,15 +1,9 @@
 /*
  * utility.cpp - Library to collects many useful functions
- * Created by Davide `rainbow` Gerhard and Alessandro `alez` Mauro
+ * Created by Davide `rainbow` Gerhard
  * 12 May 2019
  * For the license see LICENSE
  */
-
-
-#include <Arduino.h>
-#include <WiFiSpi.h>
-#include <Wire.h>
-#include <RtcDS1307.h>
 
 #include "utility.h"
 
@@ -48,6 +42,8 @@ void serialWelcome()
   Serial.println("          Copyright @ 2018                ");
   Serial.println("                                          ");
   Serial.println("                                          ");
+  Serial.print("Firmware version: ");
+  Serial.println(VERSION);
   Serial.print("Firmware compiled on: ");
   Serial.print(__DATE__);
   Serial.print(" - ");

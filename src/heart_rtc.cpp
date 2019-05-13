@@ -1,6 +1,6 @@
 /*
  * heart_rtc.cpp - implement DS1307 RTC chip present on board
- * Created by Davide `rainbow` Gerhard and Alessandro `alez` Mauro
+ * Created by Davide `rainbow` Gerhard
  * 12 May 2019
  * For the license see LICENSE
  * 

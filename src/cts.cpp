@@ -3,7 +3,7 @@
  *           like, giovanni/beatrice signature
  *           cts = Capactive Touch Sensor
  *
- * Created by Davide `rainbow` Gerhard and Alessandro `alez` Mauro
+ * Created by Davide `rainbow` Gerhard
  * 12 May 2019
  * For the license see LICENSE
  */
@@ -17,6 +17,8 @@ Cts::Cts()
 /* initialize the capactive sensors */
 void Cts::init()
 {
+    Serial.print("\nInitializing capacitive sensors (pads)...");
+
     // configure port mode
     pinMode(ctsGiovanni, INPUT);
     pinMode(ctsBeatrice, INPUT);
