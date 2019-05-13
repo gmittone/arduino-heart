@@ -30,21 +30,21 @@
 /* include the ntp client class */
 #include "ntpclient.h"
 
+/* include web server class */
+#include "webserver.h"
+
 /* include display and touch class */
 #include "display.h"
 
 /* include some useful functions */
 #include "utility.h"
 
-/* main header */
-#include "main.h"
-
 /* general configure header */
 #include "config.h"
 
 #if ENABLE_NETWORK
-/* instantiate web server on port 80 */
-WiFiSpiServer web_server(WEB_SERVER_PORT);
+/* the Wifi radio's status */
+int status = WL_IDLE_STATUS;
 
 /* instantiate ntp client */
 WiFiSpiUdp ntpUDP;
@@ -131,17 +131,12 @@ void setup()
   heart_RTC.setDateTime(timeClient.getEpochTime());
 
   // start web server
-  Serial.print("Start Webserver on host: ");
-  Serial.print(WiFiSpi.localIP());
-  Serial.print(" and port: ");
-  Serial.println(WEB_SERVER_PORT);
-  Serial.println("");
-  web_server.begin();
-  Scheduler.startLoop(web_server_loop);
+  webserver.init();
+  Scheduler.startLoop(webserver.loop());
 #endif // ENABLE_NETWORK
 
-// loop on capacitive pads
-Scheduler.startLoop(cts.loop());
+  // loop on capacitive pads
+  Scheduler.startLoop(cts.loop());
 }
 
 /*
@@ -149,73 +144,10 @@ Scheduler.startLoop(cts.loop());
  */
 void loop()
 {
-  #if ENABLE_NETWORK
+#if ENABLE_NETWORK
   timeClient.update();
   Serial.println(timeClient.getFormattedTime());
-  #endif
+#endif
 
   delay(100);
 }
-
-#if ENABLE_NETWORK
-void web_server_loop()
-{
-  // listen for incoming clients
-  WiFiSpiClient client = web_server.available();
-  if (client) {
-    #if ENABLE_DEBUG
-    Serial.println("new client");
-    #endif
-    // an http request ends with a blank line
-    bool currentLineIsBlank = true;
-    while (client.connected()) {
-      if (client.available()) {
-        char c = client.read();
-        #if ENABLE_DEBUG
-        Serial.write(c);
-        #endif
-        // if you've gotten to the end of the line (received a newline
-        // character) and the line is blank, the http request has ended,
-        // so you can send a reply
-        if (c == '\n' && currentLineIsBlank) {
-          // send a standard http response header
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: text/html");
-          client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
-          client.println();
-          client.println("<!DOCTYPE HTML>");
-          client.println("<html>");
-          // output the value of each analog input pin
-          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
-            int sensorReading = analogRead(analogChannel);
-            client.print("analog input ");
-            client.print(analogChannel);
-            client.print(" is ");
-            client.print(sensorReading);
-            client.println("<br />");
-          }
-          client.println("</html>");
-          break;
-        }
-        if (c == '\n') {
-          // you're starting a new line
-          currentLineIsBlank = true;
-        } else if (c != '\r') {
-          // you've gotten a character on the current line
-          currentLineIsBlank = false;
-        }
-      }
-    }
-    // give the web browser time to receive the data
-    delay(1);
-
-    // close the connection:
-    client.stop();
-    #if ENABLE_DEBUG
-    Serial.println("client disonnected");
-    #endif
-  }
-  yield();
-}
-#endif // ENABLE_NETWORK
