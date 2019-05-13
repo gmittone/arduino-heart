@@ -55,10 +55,6 @@ void setup()
 
   // Initialize serial and wait for port to open:
   Serial.begin(ARDUINO_SERIAL_SPEED);
-  while (!Serial)
-  {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
 
   // welcome screen on Serial
   serialWelcome();
@@ -74,6 +70,8 @@ void setup()
 #if ENABLE_DISPLAY
   // Initialize the display
   display.init();
+  // loop on display
+  Scheduler.startLoop(display.loop());
 #endif
 
 #if ENABLE_NETWORK
@@ -98,11 +96,6 @@ void setup()
 
   // loop on capacitive pads
   Scheduler.startLoop(cts.loop());
-
-#if ENABLE_DISPLAY
-  // loop on display
-  Scheduler.startLoop(display.loop());
-#endif
 }
 
 /*

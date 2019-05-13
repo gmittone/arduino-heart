@@ -26,6 +26,8 @@
 #define ctsGiovanni 68
 #define ctsBeatrice 60
 
+#define SAMPLES_FILTER 3
+
 class Cts
 {
 public:
@@ -37,6 +39,11 @@ private:
     // pad status
     bool cts_giovanni;
     bool cts_beatrice;
+
+    // low pass filter variables
+    uint8_t samples;
+    bool pressing_giovanni;
+    bool pressing_beatrice;
 };
 
 extern Cts cts;

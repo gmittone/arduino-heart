@@ -30,35 +30,54 @@ void Cts::init()
 /* manage loop */
 SchedulerTask Cts::loop()
 {
-    // TODO: implement filters to get only one touch
     while (1)
     {
-        if (digitalRead(ctsGiovanni) && !this->cts_giovanni)
+        this->pressing_giovanni = false;
+        this->pressing_beatrice = false;
+        // simple filter
+        for (this->samples = 0; SAMPLES_FILTER > this->samples; this->samples++)
+        {
+            if (digitalRead(ctsGiovanni))
+                this->pressing_giovanni = true;
+            else
+                this->pressing_giovanni = false;
+
+            if (digitalRead(ctsBeatrice))
+                this->pressing_beatrice = true;
+            else
+                this->pressing_beatrice = false;
+
+            if (!this->pressing_giovanni || !this->pressing_beatrice)
+                continue;
+
+            // we need to adjust based on respond that we want
+            delay(20);
+        }
+
+        if (this->pressing_giovanni && !this->cts_giovanni)
         {
             this->cts_giovanni = true;
 #if ENABLE_DEBUG
             Serial.println("Giovanni TOUCHED");
 #endif
         }
-        else if (this->cts_giovanni)
+        else if (!this->pressing_giovanni && this->cts_giovanni)
         {
             this->cts_giovanni = false;
         }
 
-        if (digitalRead(ctsBeatrice) && !this->cts_beatrice)
+        if (this->pressing_beatrice && !this->cts_beatrice)
         {
             this->cts_beatrice = true;
 #if ENABLE_DEBUG
             Serial.println("Beatrice TOUCHED");
 #endif
         }
-        else if (this->cts_beatrice)
+        else if (!this->pressing_beatrice && this->cts_beatrice)
         {
             this->cts_beatrice = false;
         }
 
-        // 100ms seems good
-        delay(100);
         yield();
     }
 
