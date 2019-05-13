@@ -27,6 +27,9 @@
 /* include the ntp client class */
 #include "ntpclient.h"
 
+/* include display and touch class */
+#include "display.h"
+
 /* include some useful functions */
 #include "utility.h"
 
@@ -64,6 +67,9 @@ void setup()
 
   // Initialize the RTC chip
   heart_RTC.init();
+
+  // Initialize the display
+  display.init();
 
 #if ENABLE_NETWORK
   // Initialize the WifiSpi library
