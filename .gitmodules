@@ -10,3 +10,6 @@
 [submodule "lib/Scheduler"]
 	path = lib/Scheduler
 	url = https://github.com/arduino-libraries/Scheduler.git
+[submodule "lib/SD"]
+	path = lib/SD
+	url = https://github.com/arduino-libraries/SD.git
