@@ -20,10 +20,10 @@
 
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 
-class Heart_RTCClass
+class Heart_RTC
 {
 public:
-    Heart_RTCClass();
+    Heart_RTC();
     void init();
     void setDateTime(unsigned long unixtimestamp);
     RtcDateTime getDateTime();
@@ -33,6 +33,6 @@ public:
     void printDateTime(const RtcDateTime& dt);
 };
 
-extern Heart_RTCClass Heart_RTC;
+extern Heart_RTC heart_RTC;
 
 #endif // _HEART_RTC_H

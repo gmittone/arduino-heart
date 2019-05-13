@@ -12,11 +12,11 @@
 
 RtcDS1307<TwoWire> Rtc_DS1307(Wire);
 
-Heart_RTCClass::Heart_RTCClass()
+Heart_RTC::Heart_RTC()
 {
 }
 
-void Heart_RTCClass::init()
+void Heart_RTC::init()
 {
     // Initialize RTC chip
     Rtc_DS1307.Begin();
@@ -61,7 +61,7 @@ void Heart_RTCClass::init()
     Rtc_DS1307.SetSquareWavePin(DS1307SquareWaveOut_Low);
 }
 
-void Heart_RTCClass::setDateTime(unsigned long unixtimestamp)
+void Heart_RTC::setDateTime(unsigned long unixtimestamp)
 {
     // receive an error in input; like, from ntp
     if(unixtimestamp <= 0)
@@ -71,7 +71,7 @@ void Heart_RTCClass::setDateTime(unsigned long unixtimestamp)
     Rtc_DS1307.SetDateTime(unixtimestamp - 946728000UL);
 }
 
-String Heart_RTCClass::getDateTimeString()
+String Heart_RTC::getDateTimeString()
 {
     char datestring[20];
     RtcDateTime dt = Rtc_DS1307.GetDateTime();
@@ -88,12 +88,12 @@ String Heart_RTCClass::getDateTimeString()
     return datestring;
 }
 
-RtcDateTime Heart_RTCClass::getDateTime()
+RtcDateTime Heart_RTC::getDateTime()
 {
     return Rtc_DS1307.GetDateTime();
 }
 
-unsigned long Heart_RTCClass::getDateTimeUnixTimeStamp()
+unsigned long Heart_RTC::getDateTimeUnixTimeStamp()
 {
     RtcDateTime dt;
     dt = Rtc_DS1307.GetDateTime();
@@ -101,12 +101,12 @@ unsigned long Heart_RTCClass::getDateTimeUnixTimeStamp()
     return 0UL;
 }
 
-void Heart_RTCClass::printDateTime()
+void Heart_RTC::printDateTime()
 {
     printDateTime(Rtc_DS1307.GetDateTime());
 }
 
-void Heart_RTCClass::printDateTime(const RtcDateTime& dt)
+void Heart_RTC::printDateTime(const RtcDateTime& dt)
 {
     char datestring[20];
 
@@ -122,4 +122,4 @@ void Heart_RTCClass::printDateTime(const RtcDateTime& dt)
     Serial.print(datestring);
 }
 
-Heart_RTCClass Heart_RTC;
+Heart_RTC heart_RTC;

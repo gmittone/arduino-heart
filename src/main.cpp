@@ -47,7 +47,7 @@ NTPClient timeClient(ntpUDP, NTP_SERVER);
  */
 void setup()
 {
-  // before everything configure the touch buttons;
+  // before everything configure the pads buttons;
   // they can be used as function trigger
   pinMode(ctsGiovanni, INPUT);
   pinMode(ctsBeatrice, INPUT);
@@ -63,7 +63,7 @@ void setup()
   serialWelcome();
 
   // Initialize the RTC chip
-  Heart_RTC.init();
+  heart_RTC.init();
 
 #if ENABLE_NETWORK
   // Initialize the WifiSpi library
@@ -117,8 +117,7 @@ void setup()
   Serial.print("Start ntp client to host: ");
   Serial.println(NTP_SERVER);
   timeClient.begin();
-  Heart_RTC.setDateTime(timeClient.getEpochTime());
-
+  heart_RTC.setDateTime(timeClient.getEpochTime());
 
   // start web server
   Serial.print("Start Webserver on host: ");
