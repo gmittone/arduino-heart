@@ -18,7 +18,7 @@
 #include "cts.h"
 
 /* include rtc class */
-#include "heart_rtc.h"
+#include <DS1307.h>
 
 /* include wifi management class */
 #include "wifi.h"
@@ -37,6 +37,9 @@
 
 /* include some useful functions */
 #include "utility.h"
+
+/* Initialize the RTC DS1307 chip using hardware interface */
+DS1307 rtc(SDA, SCL);
 
 #if ENABLE_NETWORK
 /* instantiate ntp client */
@@ -66,11 +69,12 @@ void setup()
   // they can be used as function trigger
   cts.init();
 
+  // start the rtc chip
+  rtc.begin();
+  setRtcFromCopiledDate();
+
   // welcome screen on Serial
   serialWelcome();
-
-  // Initialize the RTC chip
-  heart_RTC.init();
 
 #if ENABLE_SD
   // initialize vfs/sd card
@@ -94,7 +98,7 @@ void setup()
     Serial.print("Start ntp client to server: ");
     Serial.println(NTP_SERVER);
     timeClient.begin();
-    heart_RTC.setDateTime(timeClient.getEpochTime());
+    // TODO set time to rtc timeClient.getEpochTime()
 
     // start web server
     webserver.init();
@@ -103,7 +107,9 @@ void setup()
 #endif // ENABLE_NETWORK
 
 #if ENABLE_DISPLAY
-  display.drawClock();
+display.drawClock();
+display.printDate();
+display.printMariageSeconds(rtc.getTime());
 #endif
 
   Scheduler.startLoop(cts_loop);
@@ -120,11 +126,13 @@ void setup()
 void loop()
 {
 #if ENABLE_NETWORK
+/*
   if (wifi.isReady())
   {
     timeClient.update();
     Serial.println(timeClient.getFormattedTime());
   }
+  */
 #endif
 
   delay(100);

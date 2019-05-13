@@ -17,6 +17,7 @@
  *   - move to macro INFO()/WARN()/ERR()
  */
 #define ENABLE_DEBUG 0
+
 /* overwrite WiFiSpi configuration
  *
  * TODO:
@@ -39,7 +40,7 @@
  * define marriage time in unix time
  * 06/16/2018 @ 11:00pm (UTC)
  */
-#define MARIAGE_UNIXTIMESTAMP = 1529150340
+#define MARIAGE_UNIXTIMESTAMP 1529146800
 
 /* Arduino DUO serial output speed */
 #define ARDUINO_SERIAL_SPEED 115200

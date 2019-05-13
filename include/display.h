@@ -9,7 +9,8 @@
 #define _DISPLAY_H
 
 #include <Scheduler.h>
-#include "heart_rtc.h"
+#include <DS1307.h>
+#include <math.h>
 #include "config.h"
 
 /*
@@ -60,10 +61,20 @@ public:
     void lcdOff();
 
     void drawClock();
+    void printDate();
+
+    // print seconds from mariage day
+    void printMariageSeconds(Time t);
 
 private:
     // screen size
     int x_size, y_size;
+
+    // used in the loop
+    int x, y;
+
+    // time structure
+    Time t;
 
     // manage standby/backlight status
     bool lcd_standby;
@@ -75,8 +86,9 @@ private:
     void drawSec(int s);
     void drawMin(int m);
     void drawHour(int h, int m);
-    void printDate();
     void clearDate();
+
+    void printMariage();
 };
 
 extern Display display;

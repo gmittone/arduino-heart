@@ -27,6 +27,9 @@ URTouch touch(5, 6, 7, 11, 12);
 extern uint8_t BigFont[];
 extern uint8_t SmallFont[];
 
+// get rtc object from main.cpp
+extern DS1307 rtc;
+
 Display::Display()
 {
   // initialize backlight and standby port
@@ -63,7 +66,45 @@ void Display::init()
 /* loop method */
 void Display::loop()
 {
-  delay(100);
+  if (this->oldsec != this->t.sec)
+  {
+    if ((this->t.sec == 0) and (this->t.min == 0) and (this->t.hour == 0))
+    {
+      this->clearDate();
+      this->printDate();
+    }
+    if (this->t.sec == 0)
+    {
+      this->drawMin(this->t.min);
+      this->drawHour(this->t.hour, this->t.min);
+    }
+    this->drawSec(this->t.sec);
+    this->printMariageSeconds(this->t);
+    this->oldsec = this->t.sec;
+  }
+  if (touch.dataAvailable())
+  {
+    touch.read();
+    this->x = touch.getX();
+    this->y = touch.getY();
+
+    // Photo button
+    if (((this->y >= 150) && (this->y <= 189)) && ((this->x >= 260) && (this->x <= 319)))
+    {
+      lcd.setColor(255, 0, 0);
+      lcd.drawRoundRect(260, 150, 319, 189);
+    }
+
+    // Setting button
+    if (((this->y >= 200) && (this->y <= 239)) && ((this->x >= 260) && (this->x <= 319)))
+    {
+      lcd.setColor(255, 0, 0);
+      lcd.drawRoundRect(260, 200, 319, 239);
+    }
+  }
+  delay(10);
+  // TODO check position
+  this->t = rtc.getTime();
 }
 
 void Display::lcdOn()
@@ -131,12 +172,11 @@ void Display::drawClock()
       drawMark(i);
   }
 
-  RtcDateTime dt;
-  dt = heart_RTC.getDateTime();
-  drawMin(dt.Minute);
-  drawHour(dt.Hour, dt.Minute);
-  drawSec(dt.Second);
-  this->oldsec=dt.Second;
+  this->t = rtc.getTime();
+  drawMin(t.min);
+  drawHour(t.hour, t.min);
+  drawSec(t.sec);
+  oldsec = t.sec;
 
   // Draw calendar
   lcd.setColor(255, 255, 255);
@@ -166,6 +206,9 @@ void Display::drawClock()
   lcd.setBackColor(255, 0, 0);
   lcd.print("SET", 266, 212);
   lcd.setBackColor(0, 0, 0);
+
+  // Print "Married from"
+  this->printMariage();
 }
 
 void Display::drawMark(int h)
@@ -306,23 +349,16 @@ void Display::drawHour(int h, int m)
   lcd.drawLine(x4 + clockCenterX, y4 + clockCenterY, x1 + clockCenterX, y1 + clockCenterY);
 }
 
-
 void Display::printDate()
 {
-  RtcDateTime dt;
-  dt = heart_RTC.getDateTime();
+  Time t_temp;
 
-
-  drawMin(dt.Minute);
-  drawHour(dt.Hour, dt.Minute);
-  drawSec(dt.Second);
-  this->oldsec=dt.Second;
-
+  t_temp = rtc.getTime();
   lcd.setFont(BigFont);
   lcd.setColor(0, 0, 0);
   lcd.setBackColor(255, 255, 255);
   lcd.print(rtc.getDOWStr(FORMAT_SHORT), 256, 8);
-  if (t_temp.date<10)
+  if (t_temp.date < 10)
     lcd.printNumI(t_temp.date, 272, 28);
   else
     lcd.printNumI(t_temp.date, 264, 28);
@@ -334,6 +370,25 @@ void Display::clearDate()
 {
   lcd.setColor(255, 255, 255);
   lcd.fillRect(248, 8, 312, 81);
+}
+
+void Display::printMariage()
+{
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(0, 0, 0);
+  lcd.setFont(SmallFont);
+  lcd.print("Married from", middle_screen(clockCenterX*2, 12*lcd.getFontXsize()), 50);
+}
+
+void Display::printMariageSeconds(Time t)
+{
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(0, 0, 0);
+  lcd.setFont(BigFont);
+  unsigned long ut = rtc.getUnixTime(t);
+
+  lcd.setColor(255, 255, 255);
+  lcd.printNumI(ut - MARIAGE_UNIXTIMESTAMP, middle_screen(clockCenterX*2, (log10(ut - MARIAGE_UNIXTIMESTAMP) + 1)*lcd.getFontXsize()), 67);
 }
 /********************************/
 

@@ -55,9 +55,7 @@ void Cts::loop()
         if (this->pressing_giovanni && !this->cts_giovanni)
         {
             this->cts_giovanni = true;
-#if ENABLE_DEBUG
-            Serial.println("Giovanni TOUCHED");
-#endif
+            Serial.println("Pad Giovanni TOUCHED");
         }
         else if (!this->pressing_giovanni && this->cts_giovanni)
         {
@@ -67,9 +65,7 @@ void Cts::loop()
         if (this->pressing_beatrice && !this->cts_beatrice)
         {
             this->cts_beatrice = true;
-#if ENABLE_DEBUG
-            Serial.println("Beatrice TOUCHED");
-#endif
+            Serial.println("Pad Beatrice TOUCHED");
         }
         else if (!this->pressing_beatrice && this->cts_beatrice)
         {
