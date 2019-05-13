@@ -36,6 +36,9 @@
 /* include display and touch class */
 #include "display.h"
 
+/* include file system */
+#include "vfs.h"
+
 /* include some useful functions */
 #include "utility.h"
 
@@ -72,6 +75,11 @@ void setup()
 
   // Initialize the RTC chip
   heart_RTC.init();
+
+#if ENABLE_SD
+  // initialize vfs/sd card
+  vfs.init();
+#endif
 
   // Initialize the display
   display.init();

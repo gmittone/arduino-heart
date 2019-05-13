@@ -18,6 +18,9 @@
 /* enable or disable the network code */
 #define ENABLE_NETWORK 1
 
+/* enable SD card support */
+#define ENABLE_SD 1
+
 /* 
  * define marriage time in unix time
  * 06/16/2018 @ 11:00pm (UTC)
