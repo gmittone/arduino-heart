@@ -36,7 +36,7 @@ private:
     SdVolume volume;
     SdFile root;
     // simplify the check using a boolean variable
-    bool sd_ready;
+    bool ready;
 };
 
 extern VFS vfs;

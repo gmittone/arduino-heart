@@ -12,14 +12,28 @@
 #define WIFI_SSID "ArduinoHeart"
 #define WIFI_PASS "VtG5PpD8jfufym7fa77apTtjdpF"
 
-/* enable or disable debug println() */
+/* enable or disable debug messages
+ * TODO:
+ *   - move to macro INFO()/WARN()/ERR()
+ */
 #define ENABLE_DEBUG 0
+/* overwrite WiFiSpi configuration
+ *
+ * TODO:
+ * seems doesn't work rewriting _CONFIG_H_INCLUDED
+ * of lib/WiFiSpi/src/utility/debug.h and
+ * other definitions
+ */
+#define ENABLE_WIFI_DEBUG 0
 
 /* enable or disable the network code */
 #define ENABLE_NETWORK 1
 
 /* enable SD card support */
 #define ENABLE_SD 1
+
+/* enable display */
+#define ENABLE_DISPLAY 1
 
 /* 
  * define marriage time in unix time

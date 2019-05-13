@@ -10,7 +10,7 @@
 
 VFS::VFS()
 {
-    sd_ready = false;
+    this->ready = false;
 }
 
 void VFS::init()
@@ -106,7 +106,7 @@ void VFS::init()
 #endif
 
     // the card is ready to be used
-    sd_ready = true;
+    ready = true;
 }
 
 /* instantiate the class */

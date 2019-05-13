@@ -39,7 +39,7 @@ void serialWelcome()
   Serial.println("                  &&                      ");
   Serial.println("       Davide `rainbow` Gerhard           ");
   Serial.println("                                          ");
-  Serial.println("          Copyright @ 2018                ");
+  Serial.println("         Copyright @ 2018/2019            ");
   Serial.println("                                          ");
   Serial.println("                                          ");
   Serial.print("Firmware version: ");
