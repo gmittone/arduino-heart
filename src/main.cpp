@@ -44,17 +44,27 @@ WiFiSpiUdp ntpUDP;
 NTPClient timeClient(ntpUDP, NTP_SERVER);
 #endif
 
+/* "thread" functions */
+void cts_loop();
+void display_loop();
+void webserver_loop();
+
 /*
  * INITIALIZE the board
  */
 void setup()
 {
-  // before everything configure the pads buttons;
-  // they can be used as function trigger
-  cts.init();
+#if ENABLE_DISPLAY
+  // Initialize the display
+  display.init();
+#endif
 
   // Initialize serial and wait for port to open:
   Serial.begin(ARDUINO_SERIAL_SPEED);
+
+  // before everything configure the pads buttons;
+  // they can be used as function trigger
+  cts.init();
 
   // welcome screen on Serial
   serialWelcome();
@@ -68,10 +78,8 @@ void setup()
 #endif
 
 #if ENABLE_DISPLAY
-  // Initialize the display
-  display.init();
-  // loop on display
-  Scheduler.startLoop(display.loop());
+  // Welcome message
+  display.welcomeScreen();
 #endif
 
 #if ENABLE_NETWORK
@@ -90,12 +98,20 @@ void setup()
 
     // start web server
     webserver.init();
-    Scheduler.startLoop(webserver.loop());
+    Scheduler.startLoop(webserver_loop);
   }
 #endif // ENABLE_NETWORK
 
-  // loop on capacitive pads
-  Scheduler.startLoop(cts.loop());
+#if ENABLE_DISPLAY
+  display.drawClock();
+#endif
+
+  Scheduler.startLoop(cts_loop);
+
+#if ENABLE_DISPLAY
+  // loop on display
+  Scheduler.startLoop(display_loop);
+#endif
 }
 
 /*
@@ -112,4 +128,22 @@ void loop()
 #endif
 
   delay(100);
+  yield();
+}
+
+/* "thread" loops */
+void cts_loop()
+{
+  cts.loop();
+  yield();
+}
+void display_loop()
+{
+  display.loop();
+  yield();
+}
+void webserver_loop()
+{
+  webserver.loop();
+  yield();
 }

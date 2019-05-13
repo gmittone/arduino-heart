@@ -9,6 +9,7 @@
 #define _DISPLAY_H
 
 #include <Scheduler.h>
+#include "heart_rtc.h"
 #include "config.h"
 
 /*
@@ -18,6 +19,12 @@
  */
 #include <UTFT.h>
 #include <URTouch.h>
+
+/*
+ * include images converted with
+ * http://rinkydinkelectronics.com/t_imageconverter565.php
+ */
+//#include "display/heart_150x150.h"
 
 /*
  * output low ==> lcd on
@@ -30,18 +37,46 @@
  */
 #define LCD_BACKLIGHT_PIN 43
 
+/* 
+ * use as
+ * middle_screen(this->x_size, sizeof(line)*lcd.getFontXsize())
+ */
+#define middle_screen(x, y) (x - y)/2
+
+/* where the clock is centered on the screen */
+#define clockCenterX 119
+#define clockCenterY 119
+
 class Display
 {
 public:
     Display();
     void init();
-    SchedulerTask loop();
+    void welcomeScreen();
+    void loop();
+
+    // power on or off the display
+    void lcdOn();
+    void lcdOff();
+
+    void drawClock();
 
 private:
-    /* manage standby/backlight status */
+    // screen size
+    int x_size, y_size;
+
+    // manage standby/backlight status
     bool lcd_standby;
     bool lcd_backlight;
 
+    /* clock */
+    int oldsec;
+    void drawMark(int h);
+    void drawSec(int s);
+    void drawMin(int m);
+    void drawHour(int h, int m);
+    void printDate();
+    void clearDate();
 };
 
 extern Display display;

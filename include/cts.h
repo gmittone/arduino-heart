@@ -33,7 +33,7 @@ class Cts
 public:
     Cts();
     void init();
-    SchedulerTask loop();
+    void loop();
 
 private:
     // pad status

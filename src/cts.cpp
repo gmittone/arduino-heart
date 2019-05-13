@@ -28,10 +28,8 @@ void Cts::init()
 }
 
 /* manage loop */
-SchedulerTask Cts::loop()
+void Cts::loop()
 {
-    while (1)
-    {
         this->pressing_giovanni = false;
         this->pressing_beatrice = false;
         // simple filter
@@ -51,7 +49,7 @@ SchedulerTask Cts::loop()
                 continue;
 
             // we need to adjust based on respond that we want
-            delay(20);
+            delay(10);
         }
 
         if (this->pressing_giovanni && !this->cts_giovanni)
@@ -77,12 +75,6 @@ SchedulerTask Cts::loop()
         {
             this->cts_beatrice = false;
         }
-
-        yield();
-    }
-
-    // avoid warning
-    return nullptr;
 }
 
 /* instantiate the class */

@@ -103,7 +103,7 @@ unsigned long Heart_RTC::getDateTimeUnixTimeStamp()
 
 void Heart_RTC::printDateTime()
 {
-    printDateTime(Rtc_DS1307.GetDateTime());
+    this->printDateTime(Rtc_DS1307.GetDateTime());
 }
 
 void Heart_RTC::printDateTime(const RtcDateTime& dt)
@@ -119,7 +119,7 @@ void Heart_RTC::printDateTime(const RtcDateTime& dt)
             dt.Hour(),
             dt.Minute(),
             dt.Second() );
-    Serial.print(datestring);
+    Serial.println(datestring);
 }
 
 Heart_RTC heart_RTC;

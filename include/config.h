@@ -42,7 +42,7 @@
 #define MARIAGE_UNIXTIMESTAMP = 1529150340
 
 /* Arduino DUO serial output speed */
-#define ARDUINO_SERIAL_SPEED 9600
+#define ARDUINO_SERIAL_SPEED 115200
 
 /* define the ntp server used */
 #define NTP_SERVER "europe.pool.ntp.org"

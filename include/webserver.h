@@ -21,7 +21,7 @@ class WebServer
 public:
     WebServer();
     void init();
-    SchedulerTask loop();
+    void loop();
 
 private:
 
