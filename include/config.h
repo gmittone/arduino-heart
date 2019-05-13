@@ -9,8 +9,8 @@
 #define _CONFIG_H
 
 /* WiFi credentials */
-char ssid[] = "ArduinoHeart";
-char pass[] = "VtG5PpD8jfufym7fa77apTtjdpF";
+#define WIFI_SSID "ArduinoHeart"
+#define WIFI_PASS "VtG5PpD8jfufym7fa77apTtjdpF"
 
 /* enable or disable debug println() */
 #define ENABLE_DEBUG 0

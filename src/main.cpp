@@ -21,6 +21,9 @@
 */
 #include <WiFiSpi.h>
 
+/* include the capactivice touch sensors */
+#include "cts.h"
+
 /* include rtc class */
 #include "heart_rtc.h"
 
@@ -55,8 +58,7 @@ void setup()
 {
   // before everything configure the pads buttons;
   // they can be used as function trigger
-  pinMode(ctsGiovanni, INPUT);
-  pinMode(ctsBeatrice, INPUT);
+  cts.init();
 
   // Initialize serial and wait for port to open:
   Serial.begin(ARDUINO_SERIAL_SPEED);
@@ -107,9 +109,9 @@ void setup()
   while (status != WL_CONNECTED)
   {
     Serial.print("Attempting to connect to WPA SSID: ");
-    Serial.println(ssid);
+    Serial.println(WIFI_SSID);
     // Connect to WPA/WPA2 network:
-    status = WiFiSpi.begin(ssid, pass);
+    status = WiFiSpi.begin(WIFI_SSID, WIFI_PASS);
 
     // wait 5 seconds for connection:
     delay(5000);
@@ -139,7 +141,7 @@ void setup()
 #endif // ENABLE_NETWORK
 
 // loop on capacitive pads
-Scheduler.startLoop(cts_loop);
+Scheduler.startLoop(cts.loop());
 }
 
 /*
@@ -154,27 +156,6 @@ void loop()
 
   delay(100);
 }
-
-void cts_loop()
-{
-  if(digitalRead(ctsGiovanni))
-  {
-    #if ENABLE_DEBUG
-    Serial.println("Giovanni TOUCHED");
-    #endif
-  }
-  if(digitalRead(ctsBeatrice))
-  {
-    #if ENABLE_DEBUG
-    Serial.println("Beatrice TOUCHED");
-    #endif
-  }
-
-  // 100ms seems good
-  delay(100);
-  yield();
-}
-
 
 #if ENABLE_NETWORK
 void web_server_loop()

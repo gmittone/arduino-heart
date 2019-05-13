@@ -14,20 +14,7 @@
 /* the Wifi radio's status */
 int status = WL_IDLE_STATUS;
 
-/*
- * Capacitive touch sensor
- * we use the same nomenclature of hardware/heart_chema.ps
- * and the pinout is relative to Arduino DUE
- * TRIG_G for Giovanni sign = ADCH_7 = AD6
- * TRIG_B for Beatrice sign = ADCL_7 = CANRX0
- */
-#define ctsGiovanni 68
-#define ctsBeatrice 60
-
 // web server loop; used by Scheduler
 void web_server_loop();
-
-// capacitive touch sensors loop
-void cts_loop();
 
 #endif // _MAIN_H
