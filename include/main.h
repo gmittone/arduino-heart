@@ -8,29 +8,11 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-// enable or disable
-#define ENABLE_DEBUG 0
-
-// enable or disable the network code
-#define ENABLE_NETWORK 1
-
 // web server port
 #define WEB_SERVER_PORT 80
 
-/* WiFi credentials */
-char ssid[] = "ArduinoHeart";
-char pass[] = "VtG5PpD8jfufym7fa77apTtjdpF";
 /* the Wifi radio's status */
 int status = WL_IDLE_STATUS;
-
-/* define the ntp server used */
-#define NTP_SERVER "europe.pool.ntp.org"
-
-/* 
- * define marriage time in unix time
- * 06/16/2018 @ 11:00pm (UTC)
- */
-#define MARIAGE_UNIXTIMESTAMP = 1529150340
 
 /*
  * Capacitive touch sensor
@@ -41,9 +23,6 @@ int status = WL_IDLE_STATUS;
  */
 #define ctsGiovanni 68
 #define ctsBeatrice 60
-
-/* Arduino DUO serial output speed */
-#define ARDUINO_SERIAL_SPEED 9600
 
 // web server loop; used by Scheduler
 void web_server_loop();

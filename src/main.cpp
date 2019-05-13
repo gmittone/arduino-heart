@@ -36,6 +36,9 @@
 /* main header */
 #include "main.h"
 
+/* general configure header */
+#include "config.h"
+
 #if ENABLE_NETWORK
 /* instantiate web server on port 80 */
 WiFiSpiServer web_server(WEB_SERVER_PORT);
