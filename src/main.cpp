@@ -38,6 +38,9 @@
 /* include some useful functions */
 #include "utility.h"
 
+/* pin that control the esp8266 enable circuit */
+#define ESP8266_ENABLE_PIN 16
+
 /* Initialize the RTC DS1307 chip using hardware interface */
 DS1307 rtc(SDA, SCL);
 
@@ -87,6 +90,10 @@ void setup()
 #endif
 
 #if ENABLE_NETWORK
+  // enable the wifi board
+  pinMode(ESP8266_ENABLE_PIN, OUTPUT);
+  digitalWrite(ESP8266_ENABLE_PIN, 1);
+
   // initialize the wifi with config.h data
   wifi.init();
 

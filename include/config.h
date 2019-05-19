@@ -37,7 +37,7 @@
 #define ENABLE_DISPLAY 1
 
 /* 
- * define marriage time in unix time
+ * define marriage time in unix timestamp
  * 06/16/2018 @ 11:00pm (UTC)
  */
 #define MARIAGE_UNIXTIMESTAMP 1529146800
