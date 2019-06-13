@@ -46,14 +46,16 @@ void NTPClient::begin() {
 void NTPClient::begin(int port) {
   this->_port = port;
 
-  this->_udp->begin(this->_port);
-
-  this->_udpSetup = true;
+  if(this->_udp->begin(this->_port))
+    this->_udpSetup = true;
+  else
+    this->_udpSetup = false;
+  
 }
 
 bool NTPClient::forceUpdate() {
-  #ifdef DEBUG_NTPClient
-    Serial.println("Update from NTP Server");
+  #ifdef ENABLE_NTP_DEBUG
+    Serial.println("Update from NTP Server: " + this->_poolServerName);
   #endif
 
   this->sendNTPPacket();
@@ -89,7 +91,7 @@ bool NTPClient::update() {
     if (!this->_udpSetup) this->begin();                         // setup the UDP client if needed
     return this->forceUpdate();
   }
-  return true;
+  return false;
 }
 
 unsigned long NTPClient::getEpochTime() const {
@@ -99,7 +101,7 @@ unsigned long NTPClient::getEpochTime() const {
 }
 
 int NTPClient::getDay() const {
-  return (((this->getEpochTime()  / 86400L) + 4 ) % 7); //0 is Sunday
+  return (((this->getEpochTime() / 86400L) + 4 ) % 7); //0 is Sunday
 }
 int NTPClient::getHours() const {
   return ((this->getEpochTime()  % 86400L) / 3600);

@@ -12,11 +12,19 @@ Wifi::Wifi()
 {
     this->ready = false;
     this->status = WL_IDLE_STATUS;
+
+    // enable serial debug from esp8266
+    Serial1.begin(ESP8266_SERIAL_SPEED);
+    Serial1.setTimeout(100);
 }
 
 /* initialize the class */
 void Wifi::init()
 {
+    // enable the wifi board
+    pinMode(ESP8266_ENABLE_PIN, OUTPUT);
+    digitalWrite(ESP8266_ENABLE_PIN, 1);
+
     // Initialize the WifiSpi library
     WiFiSpi.init();
 
@@ -58,7 +66,7 @@ void Wifi::init()
     }
 
     // you're connected now, so print out the data:
-    Serial.print("You're connected to the network");
+    Serial.println("You're connected to the network");
     printCurrentNet();
     printWifiData();
     Serial.println("");
@@ -73,6 +81,15 @@ void Wifi::init()
 bool Wifi::isReady()
 {
     return this->ready;
+}
+
+void Wifi::readSerial()
+{
+    if (Serial1.available()) {
+        // TODO analyze the following problem
+        // use Serial1.setTimeout() so probably not good for Scheduling
+        Serial.println("ESP8266: " + Serial1.readString());
+    }
 }
 
 /* instantiate the class */

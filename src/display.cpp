@@ -8,9 +8,9 @@
 #include "display.h"
 
 /* SSD1289 controller */
-UTFT lcd(ITDB32S, 38, 39, 40, 41);
+UTFT lcd(TFT_CHIP, TFT_RS, TFT_WR, TFT_CS, TFT_RST);
 /* TSC2046 controller */
-URTouch touch(5, 6, 7, 11, 12);
+URTouch touch(TOUCH_TCLK, TOUCH_TCS, TOUCH_TDIN, TOUCH_DOUT, TOUCH_IRQ);
 
 /*
  * import images converted with
@@ -27,9 +27,6 @@ URTouch touch(5, 6, 7, 11, 12);
 extern uint8_t BigFont[];
 extern uint8_t SmallFont[];
 
-// get rtc object from main.cpp
-extern DS1307 rtc;
-
 Display::Display()
 {
   // initialize backlight and standby port
@@ -37,10 +34,17 @@ Display::Display()
   pinMode(LCD_BACKLIGHT_PIN, OUTPUT);
 
   // landscape mode
-  this->y_size = lcd.getDisplayXSize();
   this->x_size = lcd.getDisplayYSize();
+  this->y_size = lcd.getDisplayXSize();
 
   this->oldsec = 0;
+
+  this->mariage_seconds_enabled = false;
+  this->mariage_days_enabled = false;
+
+  this->photo_position = 0;
+
+  this->photo_time = 0;
 }
 
 /* initialize method */
@@ -59,6 +63,12 @@ void Display::init()
   lcd.setFont(BigFont);
   lcd.setBackColor(0, 0, 0);
 
+  // initialize the jpeg image object
+  image_jpeg.init(&lcd, TFT_CS);
+
+  // initialize the raw image object
+  image_raw.init(&lcd);
+
   // enable display
   this->lcdOn();
 }
@@ -66,45 +76,135 @@ void Display::init()
 /* loop method */
 void Display::loop()
 {
-  if (this->oldsec != this->t.sec)
+  switch (this->window_status)
   {
-    if ((this->t.sec == 0) and (this->t.min == 0) and (this->t.hour == 0))
+  // clock window
+  case clock:
+    this->t = localTime.getTime();
+    if (this->oldsec != this->t.Second)
     {
-      this->clearDate();
-      this->printDate();
-    }
-    if (this->t.sec == 0)
-    {
-      this->drawMin(this->t.min);
-      this->drawHour(this->t.hour, this->t.min);
-    }
-    this->drawSec(this->t.sec);
-    this->printMariageSeconds(this->t);
-    this->oldsec = this->t.sec;
-  }
-  if (touch.dataAvailable())
-  {
-    touch.read();
-    this->x = touch.getX();
-    this->y = touch.getY();
+      if ((this->t.Second == 0) and (this->t.Minute == 0) and (this->t.Hour == 0))
+      {
+        this->clearDate();
+        this->printDate();
+      }
+      if (this->t.Second == 0)
+      {
+        this->drawMin(this->t.Minute);
+        this->drawHour(this->t.Hour, this->t.Minute);
 
-    // Photo button
-    if (((this->y >= 150) && (this->y <= 189)) && ((this->x >= 260) && (this->x <= 319)))
-    {
-      lcd.setColor(255, 0, 0);
-      lcd.drawRoundRect(260, 150, 319, 189);
-    }
+        // update mariage days
+        if (this->mariage_days_enabled)
+        {
+          this->printMariageDays(this->t);
+        }
+      }
+      this->drawSec(this->t.Second);
 
-    // Setting button
-    if (((this->y >= 200) && (this->y <= 239)) && ((this->x >= 260) && (this->x <= 319)))
-    {
-      lcd.setColor(255, 0, 0);
-      lcd.drawRoundRect(260, 200, 319, 239);
+      // update mariage unixtimestamp
+      if (this->mariage_seconds_enabled)
+      {
+        this->printMariageSeconds(this->t);
+      }
+
+      // update the mariage value if enabled
+      if (this->mariage_seconds_enabled)
+      {
+        this->printMariageSeconds(this->t);
+      }
+      if (this->mariage_days_enabled)
+      {
+        this->printMariageDays(this->t);
+      }
+
+      this->oldsec = this->t.Second;
     }
+    if (touch.dataAvailable())
+    {
+      Serial.println("Touch data available");
+      touch.read();
+      this->x = touch.getX();
+      this->y = touch.getY();
+
+      // Setting button
+      /*
+      if (((this->y >= 150) && (this->y <= 189)) && ((this->x >= 260) && (this->x <= 319)))
+      {
+#if ENABLE_DISPLAY_DEBUG
+        Serial.println("Touched the setting button. Move to Setting screen.");
+#endif
+        lcd.setColor(255, 0, 0);
+        lcd.drawRoundRect(260, 150, 319, 189);
+      }
+      */
+
+      // Photo button
+      if (((this->y >= 200) && (this->y <= 239)) && ((this->x >= 260) && (this->x <= 319)))
+      {
+#if ENABLE_DISPLAY_DEBUG
+        Serial.println("Touched the photo button. Move to Photo screen.");
+#endif
+        this->photo_position = 0;
+        this->DrawPhoto();
+        this->photo_time = PHOTO_LOOP_TIME;
+      }
+    }
+    break;
+  // photo window
+  case photo:
+    this->photo_time--;
+    if (this->photo_time == 0)
+    {
+      this->photo_position = (this->photo_position + 1) % vfs.photos_number;
+      this->DrawPhoto();
+      this->photo_time = PHOTO_LOOP_TIME;
+    }
+    if (touch.dataAvailable())
+    {
+      Serial.println("Touch data available");
+
+      touch.read();
+      this->x = touch.getX();
+      this->y = touch.getY();
+
+      // exit button on the lower part of the screen
+      if (((this->y >= 200) && (this->y <= 239)) && ((this->x >= 0) && (this->x <= 319)))
+      {
+#if ENABLE_DISPLAY_DEBUG
+        Serial.println("Touched the lower part of the screen. Move to Clock screen.");
+#endif
+        this->drawClock();
+      }
+      // next photo in the right end of the screen
+      else if (((this->y >= 0) && (this->y <= 239)) && ((this->x >= 260) && (this->x <= 319)))
+      {
+#if ENABLE_DISPLAY_DEBUG
+        Serial.println("Touched the right end of the screen. Move to the next photo.");
+#endif
+
+        this->photo_position = (this->photo_position + 1) % vfs.photos_number;
+        this->DrawPhoto();
+        this->photo_time = PHOTO_LOOP_TIME;
+      }
+      // previous photo in the left end of the screen
+      else if (((this->y >= 0) && (this->y <= 239)) && ((this->x >= 0) && (this->x <= 60)))
+      {
+#if ENABLE_DISPLAY_DEBUG
+        Serial.println("Touched the left end of the screen. Move to the previous photo.");
+#endif
+        if (this->photo_position > 0)
+        {
+          this->photo_position--;
+          this->DrawPhoto();
+          this->photo_time = PHOTO_LOOP_TIME;
+        }
+      }
+    }
+    break;
+  default:
+    break;
   }
-  delay(10);
-  // TODO check position
-  this->t = rtc.getTime();
+  delay(DISPLAY_LOOP_TIME);
 }
 
 void Display::lcdOn()
@@ -121,8 +221,14 @@ void Display::lcdOff()
   digitalWrite(LCD_BACKLIGHT_PIN, 1);
 }
 
-void Display::welcomeScreen()
+void Display::drawWelcome()
 {
+  // set the status
+  this->window_status = welcome;
+
+  // Clear screen
+  lcd.clrScr();
+
   uint8_t middle = this->x_size / 2;
 
   char line_1[] = "Arduino Heart";
@@ -139,13 +245,18 @@ void Display::welcomeScreen()
   lcd.print(line_3, middle_screen(this->x_size, sizeof(line_3) * lcd.getFontXsize()), 195);
   lcd.print(line_4, middle_screen(this->x_size, sizeof(line_4) * lcd.getFontXsize()), 210);
 
-  // TODO check if necessary
-  delay(2000);
+  delay(WELCOME_SCREEN_WAIT);
 }
 
-/************ CLOCK *************/
 void Display::drawClock()
 {
+  // set the status
+  this->window_status = clock;
+
+  // be sure that we draw a clear screen
+  this->mariage_days_enabled = false;
+  this->mariage_seconds_enabled = false;
+
   // Clear screen
   lcd.clrScr();
 
@@ -172,11 +283,11 @@ void Display::drawClock()
       drawMark(i);
   }
 
-  this->t = rtc.getTime();
-  drawMin(t.min);
-  drawHour(t.hour, t.min);
-  drawSec(t.sec);
-  oldsec = t.sec;
+  TimeElements t = localTime.getTime();
+  drawMin(t.Minute);
+  drawHour(t.Hour, t.Minute);
+  drawSec(t.Second);
+  oldsec = t.Second;
 
   // Draw calendar
   lcd.setColor(255, 255, 255);
@@ -189,26 +300,30 @@ void Display::drawClock()
     lcd.drawLine(251 + (i * 10), 0, 250 + (i * 10), 3);
   }
 
-  // Draw photo button
+  // print the date in the calendar
+  this->printDate();
+
+  // Draw set button
+  /*
   lcd.setColor(255, 0, 0);
   lcd.fillRoundRect(260, 150, 319, 189);
   lcd.setColor(255, 255, 255);
   lcd.drawRoundRect(260, 150, 319, 189);
   lcd.setBackColor(255, 0, 0);
-  lcd.print("PHOTO", 266, 162);
+  lcd.setFont(SmallFont);
+  lcd.print("SET", 266, 162);
   lcd.setBackColor(0, 0, 0);
+  */
 
-  // Draw set button
+  // Draw photo button
   lcd.setColor(255, 0, 0);
   lcd.fillRoundRect(260, 200, 319, 239);
   lcd.setColor(255, 255, 255);
   lcd.drawRoundRect(260, 200, 319, 239);
   lcd.setBackColor(255, 0, 0);
-  lcd.print("SET", 266, 212);
+  lcd.setFont(SmallFont);
+  lcd.print("PHOTOS", 266, 212);
   lcd.setBackColor(0, 0, 0);
-
-  // Print "Married from"
-  this->printMariage();
 }
 
 void Display::drawMark(int h)
@@ -351,19 +466,19 @@ void Display::drawHour(int h, int m)
 
 void Display::printDate()
 {
-  Time t_temp;
+  TimeElements t_temp;
+  t_temp = localTime.getTime();
 
-  t_temp = rtc.getTime();
   lcd.setFont(BigFont);
   lcd.setColor(0, 0, 0);
   lcd.setBackColor(255, 255, 255);
-  lcd.print(rtc.getDOWStr(FORMAT_SHORT), 256, 8);
-  if (t_temp.date < 10)
-    lcd.printNumI(t_temp.date, 272, 28);
+  lcd.print(localTime.getDOWStr(FORMAT_SHORT), 256, 8);
+  if (t_temp.Day < 10)
+    lcd.printNumI(t_temp.Day, 272, 28);
   else
-    lcd.printNumI(t_temp.date, 264, 28);
-  lcd.print(rtc.getMonthStr(FORMAT_SHORT), 256, 48);
-  lcd.printNumI(t_temp.year, 248, 65);
+    lcd.printNumI(t_temp.Day, 264, 28);
+  lcd.print(localTime.getMonthStr(FORMAT_SHORT), 256, 48);
+  lcd.printNumI(t_temp.Year + 1970, 248, 65);
 }
 
 void Display::clearDate()
@@ -372,25 +487,147 @@ void Display::clearDate()
   lcd.fillRect(248, 8, 312, 81);
 }
 
-void Display::printMariage()
+void Display::printMariageMessage()
 {
   lcd.setColor(255, 255, 255);
   lcd.setBackColor(0, 0, 0);
   lcd.setFont(SmallFont);
-  lcd.print("Married from", middle_screen(clockCenterX*2, 12*lcd.getFontXsize()), 50);
+  lcd.print("Married from", middle_screen(clockCenterX * 2, 13 * lcd.getFontXsize()), 50);
 }
 
-void Display::printMariageSeconds(Time t)
+void Display::clearMariageMessage()
+{
+  // clear mariage message
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(0, 0, 0);
+  lcd.setFont(SmallFont);
+  lcd.print("            ", middle_screen(clockCenterX * 2, 13 * lcd.getFontXsize()), 50);
+}
+
+void Display::printMariageSeconds(TimeElements t)
 {
   lcd.setColor(255, 255, 255);
   lcd.setBackColor(0, 0, 0);
   lcd.setFont(BigFont);
-  unsigned long ut = rtc.getUnixTime(t);
 
-  lcd.setColor(255, 255, 255);
-  lcd.printNumI(ut - MARIAGE_UNIXTIMESTAMP, middle_screen(clockCenterX*2, (log10(ut - MARIAGE_UNIXTIMESTAMP) + 1)*lcd.getFontXsize()), 67);
+  time_t ut = makeTime(t);
+
+  lcd.printNumI(ut - MARIAGE_UNIXTIMESTAMP, middle_screen(clockCenterX * 2, (log10(ut - MARIAGE_UNIXTIMESTAMP) + 1) * lcd.getFontXsize()), 67);
+
+  this->mariage_seconds_enabled = true;
+  this->mariage_days_enabled = false;
 }
-/********************************/
+
+void Display::printMariageDays(TimeElements t)
+{
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(0, 0, 0);
+  lcd.setFont(BigFont);
+
+  time_t ut = makeTime(t);
+  long int days = (ut - MARIAGE_UNIXTIMESTAMP) / 86400;
+
+  lcd.printNumI(days, middle_screen(clockCenterX * 2, (log10(days) + 1) * lcd.getFontXsize()), 67);
+
+  this->mariage_days_enabled = true;
+  this->mariage_seconds_enabled = false;
+}
+
+void Display::clearMariage()
+{
+  // clear mariage value
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(0, 0, 0);
+  lcd.setFont(BigFont);
+  // quite dirty but ok
+  lcd.print("          ", middle_screen(clockCenterX * 2, 11 * lcd.getFontXsize()), 67);
+
+  this->mariage_seconds_enabled = this->mariage_seconds_enabled == true ? false : false;
+  this->mariage_days_enabled = this->mariage_days_enabled == true ? false : false;
+}
+
+void Display::DrawHand()
+{
+  drawMin(this->t.Minute);
+  drawHour(this->t.Hour, this->t.Minute);
+}
+
+void Display::DrawPhoto()
+{
+  // set the status
+  this->window_status = photo;
+
+  // Clear screen
+  lcd.clrScr();
+
+  if (vfs.ready)
+  {
+#if ENABLE_DISPLAY_DEBUG
+    photoFile = SD.open(vfs.photosList[this->photo_position], O_READ);
+    if (!photoFile)
+    {
+      this->DrawError(3774, "SD card open failed.");
+    }
+    else
+    {
+      Serial.println("File opened sucessfully");
+    }
+#endif
+
+    switch (vfs.photosType[this->photo_position])
+    {
+    case jpeg:
+      // try to decode
+      this->resJpegDecode = image_jpeg.decodeSdFile(vfs.photosList[this->photo_position]);
+      if (this->resJpegDecode)
+      {
+        // now we can draw
+#if ENABLE_DISPLAY_DEBUG
+        image_jpeg.jpegInfo();
+#endif
+        // render the image onto the screen at given coordinates (x, y)
+        image_jpeg.renderJPEG(0, 0);
+      }
+      else if (this->resJpegDecode == 0)
+      {
+        Serial.println("Progressive JPEG files are not supported.");
+      }
+      else
+      {
+        // decode failure
+        this->DrawError(3775, "Failed to decode jpeg image.");
+        return;
+      }
+      break;
+    case raw:
+        // draw raw image on the screen
+        image_raw.load(0, 0, y_size, x_size, vfs.photosList[this->photo_position], 1, 1);
+      break;
+    default:
+      break;
+    }
+  }
+  else
+  {
+    this->DrawError(3773, "SD card read failed.");
+    return;
+  }
+}
+
+// Windows like ;-)
+// Parameters:
+//   e   : error number
+//   err : error string
+void Display::DrawError(uint8_t e, char *err)
+{
+  lcd.fillScr(15, 48, 178);
+  lcd.setColor(255, 255, 255);
+  lcd.setBackColor(15, 48, 178);
+  lcd.setFont(BigFont);
+  lcd.print("Error: " + String(e, DEC), middle_screen(y_size, 12 * lcd.getFontXsize()), 80);
+  lcd.setFont(SmallFont);
+  lcd.print(err, middle_screen(y_size, sizeof(*err) * lcd.getFontXsize()), 100);
+}
 
 /* instantiate the display */
 Display display;
