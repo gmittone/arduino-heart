@@ -10,3 +10,9 @@
 [submodule "lib/SD"]
 	path = lib/SD
 	url = https://github.com/arduino-libraries/SD.git
+[submodule "lib/TimeAlarms"]
+	path = lib/TimeAlarms
+	url = https://github.com/PaulStoffregen/TimeAlarms.git
+[submodule "lib/JPEGDecoder"]
+	path = lib/JPEGDecoder
+	url = https://github.com/Bodmer/JPEGDecoder.git
