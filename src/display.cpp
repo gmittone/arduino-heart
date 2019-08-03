@@ -51,7 +51,7 @@ Display::Display()
 void Display::init()
 {
   // initialile LCD screen
-  lcd.InitLCD(LANDSCAPE);
+  lcd.InitLCD(LCD_ORIENTATION);
   lcd.clrScr();
 
   // initialize touch scree
@@ -286,7 +286,6 @@ void Display::drawClock()
   TimeElements t = localTime.getTime();
   drawMin(t.Minute);
   drawHour(t.Hour, t.Minute);
-  drawSec(t.Second);
   oldsec = t.Second;
 
   // Draw calendar

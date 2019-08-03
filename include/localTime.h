@@ -20,8 +20,14 @@
 /* include rtc hardware device class */
 #include <DS1307.h>
 
+/* include timezone facility */
+#include <Timezone.h>
+
 /* include the udp socket library */
 #include "ntpclient.h"
+
+/* include the display library */
+#include "display.h"
 
 /* include the ntp local library */
 #include "config.h"
@@ -45,15 +51,14 @@ public:
     String getFormattedTime();
     String getFormattedTime(TimeElements te);
 
-    // used on time sync
-    //time_t getNTPTime();
-
     String getDOWStr(uint8_t format);
     String getMonthStr(uint8_t format);
 
 private:
-    time_t local;
-    TimeElements local_te;
+    time_t local, utc;
+    TimeElements local_te, utc_te;
+    //pointer to the time change rule, use to get the TZ abbrev
+    TimeChangeRule *tcr;
 
     // use __DATE__, __TIME__ to set the first date
     uint8_t StringToUint8(const char* pString);

@@ -9,14 +9,14 @@
 #define _CONFIG_H
 
 /* WiFi credentials */
-#define WIFI_SSID "ArduinoHeart"
-#define WIFI_PASS "VtG5PpD8jfufym7fa77apTtjdpF"
+#define WIFI_SSID "nuje_home"
+#define WIFI_PASS "homepassword"
 
 /* enable or disable debug messages
  * TODO:
  *   - move to macro INFO()/WARN()/ERR()
  */
-#define ENABLE_DEBUG 1
+#define ENABLE_DEBUG 0
 #if ENABLE_DEBUG
 #define DEBUG
 #endif
@@ -27,7 +27,7 @@
 /* overwrite WiFiSpi configuration
  *
  * TODO:
- * seems doesn't work rewriting _CONFIG_H_INCLUDED
+ * seems it doesn't work rewriting _CONFIG_H_INCLUDED
  * of lib/WiFiSpi/src/utility/debug.h and
  * other definitions
  */
@@ -39,17 +39,17 @@
 
 /* enable or disable CTS debug messages
  */
-#define ENABLE_CTS_DEBUG 1
+#define ENABLE_CTS_DEBUG 0
 
 /* enable or disable display debug messages
  */
-#define ENABLE_DISPLAY_DEBUG 1
-
-/* enable or disable the network code */
-#define ENABLE_NETWORK 1
+#define ENABLE_DISPLAY_DEBUG 0
 
 /* enable or disable the vfs debug messages */
 #define ENABLE_VFS_DEBUG 0
+
+/* enable or disable the network code */
+#define ENABLE_NETWORK 1
 
 /* enable SD card support */
 #define ENABLE_SD 1

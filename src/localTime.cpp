@@ -11,6 +11,11 @@
 // instantiate the RTC hardware
 DS1307 rtc(SDA, SCL);
 
+// create object for central european time
+TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120}; //Central European Summer Time
+TimeChangeRule CET = {"CET ", Last, Sun, Oct, 3, 60};   //Central European Standard
+Timezone CE(CEST, CET);
+
 #if ENABLE_NETWORK
 WiFiSpiUdp ntpUDP;
 NTPClient ntpClient(ntpUDP, NTP_SERVER);
@@ -28,14 +33,19 @@ void LocalTime::init()
     // check if rtc has good time
     // initial startup 01/01/00 01 00:00:00
     // (MM/DD/YY DOW HH:MM:SS)
+    // NOTE not so useful and not UTC aware
+    /*
     Time t = rtc.getTime();
     if(t.mon == 01 && t.date == 01 && t.year == 2000)
     {
         this->setRtcFromCopiledDate();
     }
-  
+    */
+
     // get the time from rtc
-    this->local = rtc.getUnixTime(rtc.getTime());
+    this->utc = rtc.getUnixTime(rtc.getTime());
+    this->local = CE.toLocal(this->utc, &tcr);
+    breakTime(this->utc, this->utc_te);
     breakTime(this->local, this->local_te);
 
     Serial.println("Local time is: " + this->getFormattedTime());
@@ -44,11 +54,15 @@ void LocalTime::init()
 void LocalTime::loop()
 {
     timeStatus();
-    this->local = rtc.getUnixTime(rtc.getTime());
+    this->utc = rtc.getUnixTime(rtc.getTime());
+    this->local = CE.toLocal(this->utc, &tcr);
+    breakTime(this->utc, this->utc_te);
     breakTime(this->local, this->local_te);
+
 #if ENABLE_TIME_DEBUG
-    Serial.println("Local unixtimestamp: " + String(this->local) + " Local time: " + this->getFormattedTime());
+    Serial.println("Local time: " + this->getFormattedTime());
 #endif
+
     delay(1000);
 }
 
@@ -60,26 +74,33 @@ void LocalTime::loop()
  */
 time_t runSyncTime()
 {
-#if ENABLE_NETWORK    
+#if ENABLE_NETWORK
     if (ntpClient.update())
     {
+#if ENABLE_TIME_DEBUG
+        Serial.println("Set new time from NTP");
+#endif
         time_t t = ntpClient.getEpochTime();
+        
         TimeElements te;
         breakTime(t, te);
         rtc.setDate(te.Day, te.Month, te.Year + 1970);
-        rtc.setTime(te.Hour, te.Minute, te.Second); 
+        rtc.setTime(te.Hour, te.Minute, te.Second);
+        
+        // HACK!! very bad but the time is narrow
+        localTime.setTime(t);
         return t;
     }
     else
     {
         return 0;
     }
-#endif    
+#endif
 }
 
 void LocalTime::enableNTP()
 {
-#if ENABLE_NETWORK    
+#if ENABLE_NETWORK
     // synchronize with ntp every NTP_UPDATE_INTERVAL
     // Write the NTP time to the local RTC chip
     // TODO evaluate latency from NTP function to set on RTC
@@ -93,26 +114,39 @@ void LocalTime::enableNTP()
     uint8_t status = timeStatus();
     if (status == timeSet)
     {
-        String status_string = (status == timeNotSet ? "timeNotSet" : (status == timeSet ? "timeSet" : "timeNeedsSync" ));
+        String status_string = (status == timeNotSet ? "timeNotSet" : (status == timeSet ? "timeSet" : "timeNeedsSync"));
 #if ENABLE_TIME_DEBUG
         Serial.println("Time sync status: " + status_string);
         Serial.println("NTP time is: " + ntpClient.getFormattedTime());
-#endif        
+#endif
     }
-#endif // ENABLE_NETWORK    
-#if ENABLE_TIME_DEBUG    
+#endif // ENABLE_NETWORK
+#if ENABLE_TIME_DEBUG
     Serial.println("Now local time is: " + this->getFormattedTime());
 #endif
 }
 
 void LocalTime::setTime(time_t t)
 {
-    this->local = t;
+    this->utc = t;
+    this->local = CE.toLocal(this->utc, &tcr);
+    breakTime(this->utc, this->utc_te);
     breakTime(this->local, this->local_te);
 
-    // TODO may move to a RTC DS1307 library that support time_t
-    rtc.setTime(this->local_te.Hour, this->local_te.Minute, this->local_te.Second);
-    rtc.setDate(this->local_te.Day, this->local_te.Month, this->local_te.Year);
+    // TODO maybe move to a RTC DS1307 library that support time_t
+    //      or write a new function
+    rtc.setTime(this->utc_te.Hour, this->utc_te.Minute, this->utc_te.Second);
+    rtc.setDate(this->utc_te.Day, this->utc_te.Month, this->utc_te.Year);
+
+    // this is needed to avoid multiple hand, the old and the new one,
+    // shown at the same time otherwise we need to change the clock function
+#if ENABLE_DISPLAY
+    // check if the display is in clock status
+    if (display.window_status == clock)
+    {
+        display.drawClock();
+    }
+#endif
 }
 
 TimeElements LocalTime::getTime()
@@ -186,6 +220,7 @@ uint8_t LocalTime::StringToUint8(const char *pString)
 }
 
 // use __DATE__, __TIME__ to set the first date
+// not UTC aware
 void LocalTime::setRtcFromCopiledDate()
 {
     uint16_t year;

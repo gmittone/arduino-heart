@@ -49,6 +49,11 @@
 #define TOUCH_IRQ   12
 
 /*
+ * lcd orientation
+ */
+#define LCD_ORIENTATION LANDSCAPE
+
+/*
  * output low ==> lcd on
  * output high ==> light off
  */

@@ -9,6 +9,8 @@
 #define _IMAGE_JPEG_H
 
 #include "config.h"
+#include "display.h"
+
 /*
  * include display and touchscreen libs
  * 

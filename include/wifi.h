@@ -25,7 +25,9 @@
 #define ESP8266_ENABLE_PIN 16
 
 /* how many milliseconds we need to wait for wifi connection */
-#define WAIT_CONNECTION 3000
+#define WIFI_WAIT_CONNECTION 3000
+
+#define WIFI_RETRY 3
 
 class Wifi
 {

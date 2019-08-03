@@ -54,15 +54,20 @@ void Wifi::init()
     }
 
     // attempt to connect to Wifi network:
-    while (status != WL_CONNECTED)
+    uint8_t retry = WIFI_RETRY;
+    while (status != WL_CONNECTED && retry > 0)
     {
         Serial.print("Attempting to connect to WPA SSID: ");
         Serial.println(WIFI_SSID);
+        
         // Connect to WPA/WPA2 network:
         status = WiFiSpi.begin(WIFI_SSID, WIFI_PASS);
 
+        // decrement retry
+        retry--;
+
         // wait connection
-        delay(WAIT_CONNECTION);
+        delay(WIFI_WAIT_CONNECTION);
     }
 
     // you're connected now, so print out the data:

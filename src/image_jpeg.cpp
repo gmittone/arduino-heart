@@ -13,8 +13,8 @@ ImageJpeg::ImageJpeg()
 
 void ImageJpeg::init(UTFT *ptrUTFT, uint32_t tft_cs)
 {
-    _UTFT = ptrUTFT;
-    _tft_cs = tft_cs;
+  _UTFT = ptrUTFT;
+  _tft_cs = tft_cs;
 }
 
 void ImageJpeg::jpegInfo()
@@ -41,9 +41,9 @@ void ImageJpeg::jpegInfo()
   Serial.println(F("==============="));
 }
 
-int ImageJpeg::decodeSdFile(const char* file)
+int ImageJpeg::decodeSdFile(const char *file)
 {
-    return JpegDec.decodeSdFile(file);
+  return JpegDec.decodeSdFile(file);
 }
 
 void ImageJpeg::renderJPEG(int xpos, int ypos)
@@ -68,6 +68,10 @@ void ImageJpeg::renderJPEG(int xpos, int ypos)
 
   // record the current time so we can measure how long it takes to draw an image
   uint32_t drawTime = millis();
+
+  // dd
+  uint16_t tc, tr;
+  uint16_t *tp ;
 
   // save the coordinate of the right and bottom edges to assist image cropping
   // to the screen size
@@ -101,20 +105,31 @@ void ImageJpeg::renderJPEG(int xpos, int ypos)
     // draw image MCU block only if it will fit on the screen
     if ((mcu_x + win_w) <= _UTFT->getDisplayXSize() && (mcu_y + win_h) <= _UTFT->getDisplayYSize())
     {
-      // Now set a MCU bounding window on the TFT to push pixels into (x, y, x + width - 1, y + height - 1)
       digitalWrite(_tft_cs, LOW); // Set chip select low so we can take control of display
-      _UTFT->setXY(mcu_x, mcu_y, mcu_x + win_w - 1, mcu_y + win_h - 1);
 
-      // Write all MCU pixels to the TFT window
+// Write all MCU pixels to the TFT window
+#if LCD_ORIENTATION == PORTAINT
+      // Now set a MCU bounding window on the TFT to push pixels into (x, y, x + width - 1, y + height - 1)
+      _UTFT->setXY(mcu_x, mcu_y, mcu_x + win_w - 1, mcu_y + win_h - 1);
       while (mcu_pixels--)
       {
         // Push each pixel to the TFT MCU area
-        uint8_t col_h = (*pImg) >> 8;     // High byte
-        uint8_t col_l = (*pImg) & 0xFF;   // Low byte
-        pImg++;                           // Increment pointer
+        uint8_t col_h = (*pImg) >> 8;        // High byte
+        uint8_t col_l = (*pImg) & 0xFF;      // Low byte
         _UTFT->LCD_Write_DATA(col_h, col_l); // Send a pixel colour to window
+        pImg++;                              // Increment pointer
       }
-      digitalWrite(_tft_cs, HIGH); // Set chip select high to release contol
+#else // LANDSCAPE
+      _UTFT->setXY(mcu_x, mcu_y, mcu_x + win_w - 1, mcu_y + win_h - 1);
+      for (tc = 1; tc <= win_w; tc++)
+      {
+        for (tr = 0; tr < win_h; tr++)
+        {
+          tp = pImg + tr * win_w + win_w - tc;
+          _UTFT->LCD_Write_DATA((*tp) >> 8, (*tp) & 0xFF); // Send a pixel colour to window
+        }
+      }
+#endif
     }
 
     // Stop drawing blocks if the bottom of the screen has been reached,
@@ -127,10 +142,12 @@ void ImageJpeg::renderJPEG(int xpos, int ypos)
   drawTime = millis() - drawTime;
 
   // print the results to the serial port
+#if ENABLE_DISPLAY && ENABLE_DEBUG
   Serial.print(F("Total render time was    : "));
   Serial.print(drawTime);
   Serial.println(F(" ms"));
   Serial.println(F(""));
+#endif  
 }
 
 // instantiate the class
