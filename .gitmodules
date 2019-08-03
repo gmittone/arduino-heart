@@ -16,3 +16,6 @@
 [submodule "lib/JPEGDecoder"]
 	path = lib/JPEGDecoder
 	url = https://github.com/Bodmer/JPEGDecoder.git
+[submodule "lib/Timezone"]
+	path = lib/Timezone
+	url = https://github.com/JChristensen/Timezone.git
