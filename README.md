@@ -30,7 +30,6 @@ Main configuration parameters live at `include/config.h` where you can find many
 
 # Todo
 
-- timezone
 - use interrupt or timer to manage changes on display, like slideshow photo change or "marriage from" clean
 - multiple udp/tcp socket like, ntp and webserver at the same time
 - sleep mode with wake up
@@ -45,5 +44,6 @@ Main configuration parameters live at `include/config.h` where you can find many
 - SAM scheduler [repository](https://github.com/arduino-libraries/Scheduler)
 - Arduino SD library [site](http://www.arduino.cc/en/Reference/SD)
 - Paul Stoffregen for [TimeAlarms](https://github.com/PaulStoffregen/TimeAlarms)
+- Jack Christensen for [Timezone](https://github.com/JChristensen/Timezone)
 - Bodmer for [JPEGDecoder](https://github.com/Bodmer/JPEGDecoder)
 - Graham Lawrence for the [UTFT_SdRaw](https://github.com/ghlawrence2000/UTFT_SdRaw) code
